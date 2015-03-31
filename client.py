@@ -60,7 +60,7 @@ class Client(object):
         try:
             dom = parseString(result)
             return map(self.number_or_string,
-                    [x.firstChild.data for x in dom.getElementsByTagName('item')])
+                    [x.firstChild.data if x.firstChild else '' for x in dom.getElementsByTagName('item')])
         except:
             return self.number_or_string(result)
 
