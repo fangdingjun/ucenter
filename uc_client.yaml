@@ -24,6 +24,26 @@
 
 -
   module: user
+  action: delete
+  args:
+    uid: 0
+  return: number
+
+-
+  module: user
+  action: edit
+  args:
+     username: ""
+     oldpw: ""
+     newpw: ""  
+     email: ""
+     ignoreoldpw: 0
+     questionid: ""
+     answer: "" 
+  return: number
+
+-
+  module: user
   action: get_user
   args:
     username: ""
@@ -45,14 +65,14 @@
 
 -
   module: user
-  action: checkemail
+  action: check_email
   args:
     email: ""
   return: number
 
 -
   module: user
-  action: checkname
+  action: check_username
   args:
     username: ""
   return: number
