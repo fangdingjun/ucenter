@@ -13,17 +13,21 @@ class Configs(object):
     UC_APPID = ''
     UC_PPP = '20'
 
-    UC_CLIENT_VERSION = '1.5.2'
-    UC_CLIENT_RELEASE = '20101001'
+    UC_CLIENT_VERSION = '1.6.0'
+    UC_CLIENT_RELEASE = '20110501'
     
 def b64_encode(s):
-    return base64.encodestring(s)
+    return base64.b64encode(s)
     
 def b64_decode(s):
-    try:
-        return base64.decodestring(s)
-    except:
-        return b64_decode(s+"=")
+    len1 = len(s)
+    len2 = len1 % 4
+    s1 = s
+
+    # need padding
+    if len2 != 0:
+        s1 = s + '=' * len2
+    return base64.b64decode(s1)
 
 def random_string(length):
     charArray = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
@@ -58,7 +62,6 @@ class Ucenter(object):
             keyc = ''
 
         cryptkey = keya + md5(keya + keyc)
-        key_length = len(cryptkey)
 
         if operation == cls.DECODE:
             string = b64_decode(string[ckey_length:])
@@ -66,23 +69,9 @@ class Ucenter(object):
             if expiry:
                 expiry += now()
             string = '%10d' % expiry + md5(string + keyb)[:16] + string
-        string_length = len(string)
 
-        result = ''
-        rndkey = [ord(cryptkey[i % key_length]) for i in range(256)]
-        box = range(256)
-        j = 0
-        for i in xrange(256):
-            j = (j + box[i] + rndkey[i]) % 256
-            box[i], box[j] = box[j], box[i]
-
-        a, j = 0, 0
-        for i in xrange(string_length):
-            a = (a + 1) % 256
-            j = (j + box[a]) % 256
-            box[a], box[j] = box[j], box[a]
-            result += chr(ord(string[i]) ^ (box[(box[a] + box[j]) % 256]))
-
+        result = rc4(string, cryptkey)
+    
         if operation == cls.DECODE:
             if (int(result[:10]) == 0 or int(result[:10]) - now() > 0) \
                 and result[10:26] == md5(result[26:] + keyb)[:16]:
